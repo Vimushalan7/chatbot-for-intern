@@ -1,0 +1,51 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+*.whl
+
+# ── Virtual environments ───────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Environment files ──────────────────────────────────────────────────────────
+.env
+*.env.local
+*.env.production
+
+# ── Data (vector store + uploaded PDFs) ──────────────────────────────────────
+backend/data/chroma_db/
+backend/data/uploads/
+data/
+
+# ── Node.js (if React frontend added later) ──────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.next/
+frontend/build/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

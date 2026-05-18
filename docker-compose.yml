@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # FastAPI backend service
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/app/data/chroma_db
+      - upload_data:/app/data/uploads
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llama3.2
+      - CHROMA_PERSIST_DIR=/app/data/chroma_db
+      - UPLOAD_DIR=/app/data/uploads
+    depends_on:
+      - ollama
+
+  # Ollama CPU runner service
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    # Pull model automatically on startup
+    entrypoint: [ "/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.2 && ollama pull nomic-embed-text && tail -f /dev/null" ]
+
+volumes:
+  chroma_data:
+  upload_data:
+  ollama_data:
