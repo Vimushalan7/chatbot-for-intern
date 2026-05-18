@@ -88,6 +88,13 @@ class OllamaLLM:
             }
             try:
                 resp = requests.post(url, json=payload, headers=headers, timeout=60)
+                if resp.status_code != 200:
+                    err_msg = resp.text
+                    try:
+                        err_msg = resp.json().get("error", {}).get("message", resp.text)
+                    except Exception:
+                        pass
+                    raise RuntimeError(f"Groq API Error: {err_msg}")
                 resp.raise_for_status()
                 return resp.json()["choices"][0]["message"]["content"].strip()
             except Exception as e:
