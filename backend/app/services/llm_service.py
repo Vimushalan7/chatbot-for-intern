@@ -91,7 +91,11 @@ class OllamaLLM:
                 resp.raise_for_status()
                 return resp.json()["choices"][0]["message"]["content"].strip()
             except Exception as e:
-                logger.error(f"Groq API call failed: {e}. Falling back to local Ollama.")
+                logger.error(f"Groq API call failed: {e}.")
+                raise RuntimeError(
+                    f"Groq API call failed: {e}. "
+                    "Please verify that your GROQ_API_KEY is correct and active in your Render settings."
+                )
 
         # Fallback to local Ollama
         payload = {
