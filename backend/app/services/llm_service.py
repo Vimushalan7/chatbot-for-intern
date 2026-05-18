@@ -199,7 +199,15 @@ Make it easy to understand and highlight the most important points."""
         return self._generate(prompt, system=SECTION_SYSTEM_PROMPT)
 
     def health_check(self) -> dict:
-        """Return Ollama server status and available models."""
+        """Return Ollama server or Cloud status and available models."""
+        import os
+        if os.environ.get("GROQ_API_KEY"):
+            return {
+                "status": "online",
+                "models": ["llama-3.2-3b-preview"],
+                "active_model": os.environ.get("GROQ_MODEL", "llama-3.2-3b-preview")
+            }
+
         if not self._is_available():
             return {"status": "offline", "models": []}
         try:
