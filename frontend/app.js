@@ -15,7 +15,10 @@
 'use strict';
 
 // ── Configuration ──────────────────────────────────────────────────────────────
-const API_BASE = 'http://localhost:8000/api';
+// Automatically uses localhost/WiFi-IP for local testing, and your deployed Render URL for production
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.')
+  ? `http://${window.location.hostname}:8000/api`
+  : 'https://chatbot-for-intern.onrender.com/api'; // <-- REPLACE with your actual Render Web Service URL if you name it differently on Render!
 
 // ── State ──────────────────────────────────────────────────────────────────────
 const state = {
