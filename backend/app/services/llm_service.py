@@ -53,7 +53,10 @@ class OllamaLLM:
         self.model    = settings.OLLAMA_MODEL
 
     def _is_available(self) -> bool:
-        """Check if Ollama server is running."""
+        """Check if LLM is available (either local Ollama or cloud Groq)."""
+        import os
+        if os.environ.get("GROQ_API_KEY"):
+            return True
         try:
             resp = requests.get(f"{self.base_url}/api/tags", timeout=5)
             return resp.status_code == 200
@@ -62,9 +65,35 @@ class OllamaLLM:
 
     def _generate(self, prompt: str, system: str = "", stream: bool = False) -> str:
         """
-        Call Ollama /api/generate endpoint.
-        Returns the full response text (non-streaming).
+        Call LLM. If GROQ_API_KEY is present in environment variables, uses Groq Cloud API.
+        Otherwise, falls back to local Ollama REST API.
         """
+        import os
+        groq_key = os.environ.get("GROQ_API_KEY")
+        if groq_key:
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {groq_key}",
+                "Content-Type": "application/json"
+            }
+            # Use llama-3.2-3b-preview as default, or any configured model (e.g., llama-3.3-70b-specdec)
+            groq_model = os.environ.get("GROQ_MODEL", "llama-3.2-3b-preview")
+            payload = {
+                "model": groq_model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.0,
+            }
+            try:
+                resp = requests.post(url, json=payload, headers=headers, timeout=60)
+                resp.raise_for_status()
+                return resp.json()["choices"][0]["message"]["content"].strip()
+            except Exception as e:
+                logger.error(f"Groq API call failed: {e}. Falling back to local Ollama.")
+
+        # Fallback to local Ollama
         payload = {
             "model":  self.model,
             "prompt": prompt,
