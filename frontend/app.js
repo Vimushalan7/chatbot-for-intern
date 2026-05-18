@@ -131,7 +131,7 @@ function updateThemeIcons(isLight) {
 // Health Check
 // ══════════════════════════════════════════════════════════════════════════════
 
-async function checkHealth() {
+async function checkHealth(isInitial = false) {
   dom.statusDot.className  = 'status-dot loading';
   dom.statusText.textContent = 'Connecting…';
   try {
@@ -145,12 +145,19 @@ async function checkHealth() {
     } else {
       dom.statusDot.className   = 'status-dot offline';
       dom.statusText.textContent = 'Ollama offline';
-      showToast('⚠️ Ollama is not running. Run: ollama serve', 'error', 8000);
+      if (isInitial) {
+        showToast('⚠️ Ollama is not running. Run: ollama serve', 'error', 8000);
+      }
     }
   } catch {
     dom.statusDot.className   = 'status-dot offline';
     dom.statusText.textContent = 'Backend offline';
-    showToast('Cannot reach backend. Is the server running on port 8000?', 'error', 8000);
+    if (isInitial) {
+      const msg = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === ''
+        ? 'Cannot reach backend. Is the local server running on port 8000?'
+        : 'Cannot reach backend. Please check your Render server status.';
+      showToast(msg, 'error', 8000);
+    }
   }
 }
 
@@ -577,10 +584,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupThemeToggle();
   setupQuickActions();
   setupExampleChips();
-  checkHealth();
+  checkHealth(true);
 
-  // Re-check health every 30 seconds
-  setInterval(checkHealth, 30_000);
+  // Re-check health every 30 seconds (silent background updates)
+  setInterval(() => checkHealth(false), 30_000);
 
   // Focus input
   dom.questionInput.focus();
