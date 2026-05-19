@@ -52,9 +52,9 @@ class OllamaLLM:
         self.model = settings.OLLAMA_MODEL
 
     def _is_available(self) -> bool:
-        """Check if LLM is available (either local Ollama or cloud Groq)."""
+        """Check if LLM is available (either local Ollama or cloud Groq/Claude)."""
         import os
-        if os.environ.get("GROQ_API_KEY"):
+        if os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("GROQ_API_KEY"):
             return True
         try:
             resp = requests.get(f"{self.base_url}/api/tags", timeout=5)
@@ -64,10 +64,48 @@ class OllamaLLM:
 
     def _generate(self, prompt: str, system: str = "", stream: bool = False) -> str:
         """
-        Call LLM. If GROQ_API_KEY is present in environment variables, uses Groq Cloud API.
+        Call LLM.
+        If ANTHROPIC_API_KEY is present in environment variables, uses Claude AI via Anthropic API.
+        If GROQ_API_KEY is present, uses Groq Cloud API.
         Otherwise, falls back to local Ollama REST API.
         """
         import os
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+        if anthropic_key:
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": anthropic_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            }
+            claude_model = os.environ.get("CLAUDE_MODEL", "claude-3-5-sonnet-latest")
+            payload = {
+                "model": claude_model,
+                "max_tokens": 1024,
+                "system": system,
+                "messages": [
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": 0.0
+            }
+            try:
+                resp = requests.post(url, json=payload, headers=headers, timeout=60)
+                if resp.status_code != 200:
+                    err_msg = resp.text
+                    try:
+                        err_msg = resp.json().get("error", {}).get("message", resp.text)
+                    except Exception:
+                        pass
+                    raise RuntimeError(f"Anthropic API Error: {err_msg}")
+                resp.raise_for_status()
+                return resp.json()["content"][0]["text"].strip()
+            except Exception as e:
+                logger.error(f"Anthropic API call failed: {e}.")
+                raise RuntimeError(
+                    f"Anthropic API call failed: {e}. "
+                    "Please verify that your ANTHROPIC_API_KEY is correct and active in your Render settings."
+                )
+
         groq_key = os.environ.get("GROQ_API_KEY")
         if groq_key:
             url = "https://api.groq.com/openai/v1/chat/completions"
@@ -211,6 +249,13 @@ Make it easy to understand and highlight the most important points."""
     def health_check(self) -> dict:
         """Return Ollama server or Cloud status and available models."""
         import os
+        if os.environ.get("ANTHROPIC_API_KEY"):
+            return {
+                "status": "online",
+                "models": ["claude-3-5-sonnet-latest"],
+                "active_model": os.environ.get("CLAUDE_MODEL", "claude-3-5-sonnet-latest")
+            }
+
         if os.environ.get("GROQ_API_KEY"):
             return {
                 "status": "online",
