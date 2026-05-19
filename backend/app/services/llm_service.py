@@ -75,8 +75,8 @@ class OllamaLLM:
                 "Authorization": f"Bearer {groq_key}",
                 "Content-Type": "application/json"
             }
-            # Use llama-3.2-3b-preview as default, or any configured model (e.g., llama-3.3-70b-specdec)
-            groq_model = os.environ.get("GROQ_MODEL", "llama-3.2-3b-preview")
+            # Use llama-3.3-70b-versatile as default, or any configured model (e.g., llama-3.3-70b-specdec)
+            groq_model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
             payload = {
                 "model": groq_model,
                 "messages": [
@@ -214,8 +214,8 @@ Make it easy to understand and highlight the most important points."""
         if os.environ.get("GROQ_API_KEY"):
             return {
                 "status": "online",
-                "models": ["llama-3.2-3b-preview"],
-                "active_model": os.environ.get("GROQ_MODEL", "llama-3.2-3b-preview")
+                "models": ["llama-3.3-70b-versatile"],
+                "active_model": os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
             }
 
         if not self._is_available():
