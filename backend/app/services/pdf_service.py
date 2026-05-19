@@ -11,7 +11,6 @@ Strategy:
 
 import re
 import uuid
-from pathlib import Path
 from typing import Optional
 
 from app.core.config import settings
@@ -20,13 +19,13 @@ from app.core.logger import logger
 
 # ── Section patterns for research paper structure ──────────────────────────────
 SECTION_PATTERNS = {
-    "abstract":    re.compile(r"\babstract\b", re.IGNORECASE),
+    "abstract": re.compile(r"\babstract\b", re.IGNORECASE),
     "introduction": re.compile(r"\bintroduction\b", re.IGNORECASE),
     "methodology": re.compile(r"\b(methodology|methods?|approach)\b", re.IGNORECASE),
-    "results":     re.compile(r"\b(results?|experiments?|evaluation)\b", re.IGNORECASE),
-    "discussion":  re.compile(r"\bdiscussion\b", re.IGNORECASE),
-    "conclusion":  re.compile(r"\b(conclusion|summary|future\s+work)\b", re.IGNORECASE),
-    "references":  re.compile(r"\b(references|bibliography)\b", re.IGNORECASE),
+    "results": re.compile(r"\b(results?|experiments?|evaluation)\b", re.IGNORECASE),
+    "discussion": re.compile(r"\bdiscussion\b", re.IGNORECASE),
+    "conclusion": re.compile(r"\b(conclusion|summary|future\s+work)\b", re.IGNORECASE),
+    "references": re.compile(r"\b(references|bibliography)\b", re.IGNORECASE),
 }
 
 
@@ -81,8 +80,8 @@ def extract_text(file_path: str) -> str:
     """
     results = {
         "pdfplumber": extract_text_pdfplumber(file_path),
-        "pymupdf":    extract_text_pymupdf(file_path),
-        "pypdf":      extract_text_pypdf(file_path),
+        "pymupdf": extract_text_pymupdf(file_path),
+        "pypdf": extract_text_pypdf(file_path),
     }
     # pick the extractor that returned the most text
     best_method, best_text = max(results.items(), key=lambda kv: len(kv[1]))
@@ -120,12 +119,12 @@ def chunk_text(text: str, chunk_size: int = None, overlap: int = None) -> list[s
     Uses simple character-based splitting with sentence-boundary awareness.
     """
     chunk_size = chunk_size or settings.CHUNK_SIZE
-    overlap    = overlap    or settings.CHUNK_OVERLAP
+    overlap = overlap or settings.CHUNK_OVERLAP
 
     # Prefer splitting at sentence endings
     sentences = re.split(r"(?<=[.!?])\s+", text)
-    chunks    = []
-    current   = ""
+    chunks = []
+    current = ""
 
     for sentence in sentences:
         if len(current) + len(sentence) <= chunk_size:
@@ -174,12 +173,12 @@ def process_pdf(file_path: str, document_id: Optional[str] = None) -> dict:
     # 4. Basic metadata
     try:
         import fitz
-        doc  = fitz.open(file_path)
+        doc = fitz.open(file_path)
         meta = {
             "page_count": len(doc),
-            "title":      doc.metadata.get("title", ""),
-            "author":     doc.metadata.get("author", ""),
-            "subject":    doc.metadata.get("subject", ""),
+            "title": doc.metadata.get("title", ""),
+            "author": doc.metadata.get("author", ""),
+            "subject": doc.metadata.get("subject", ""),
         }
         doc.close()
     except Exception:
@@ -189,8 +188,8 @@ def process_pdf(file_path: str, document_id: Optional[str] = None) -> dict:
 
     return {
         "document_id": document_id,
-        "full_text":   full_text,
-        "sections":    sections,
-        "chunks":      chunks,
-        "metadata":    meta,
+        "full_text": full_text,
+        "sections": sections,
+        "chunks": chunks,
+        "metadata": meta,
     }

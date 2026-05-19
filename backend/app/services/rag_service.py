@@ -74,8 +74,8 @@ class RAGService:
         # 3. Cache sections and full text in memory (keyed by document_id)
         self._doc_cache[document_id] = {
             "full_text": result["full_text"],
-            "sections":  result["sections"],
-            "metadata":  result["metadata"],
+            "sections": result["sections"],
+            "metadata": result["metadata"],
         }
 
         logger.info(
@@ -83,9 +83,9 @@ class RAGService:
         )
 
         return {
-            "document_id":  document_id,
-            "chunk_count":  chunk_count,
-            "page_count":   result["metadata"].get("page_count", "N/A"),
+            "document_id": document_id,
+            "chunk_count": chunk_count,
+            "page_count": result["metadata"].get("page_count", "N/A"),
             "sections_found": list(result["sections"].keys()),
         }
 
@@ -100,21 +100,21 @@ class RAGService:
         Bypassing retrieval for these saves massive prefill latency.
         """
         greetings = {
-            "hi", "hello", "hey", "greetings", "good morning", "good afternoon", 
+            "hi", "hello", "hey", "greetings", "good morning", "good afternoon",
             "good evening", "howdy", "whats up", "what's up", "yo", "hola",
             "who are you", "who are you?", "what is your name", "what's your name",
             "what can you do", "what can you do?", "help", "help me", "how are you"
         }
         # Strip punctuation and normalize
         clean = "".join(c for c in query.lower() if c.isalnum() or c.isspace()).strip()
-        
+
         if clean in greetings:
             return True
-            
+
         # Also check for simple starting words
         if clean.startswith(("hello ", "hi ", "hey ", "good morning ", "good afternoon ", "good evening ")):
             return True
-            
+
         return False
 
     # ── Question Answering ─────────────────────────────────────────────────────
@@ -174,9 +174,9 @@ class RAGService:
         # 4. Return answer + source references for transparency
         sources = [
             {
-                "text":     h["text"][:300] + "…" if len(h["text"]) > 300 else h["text"],
+                "text": h["text"][:300] + "…" if len(h["text"]) > 300 else h["text"],
                 "metadata": h["metadata"],
-                "score":    round(1 - h["distance"], 3),  # convert distance → similarity
+                "score": round(1 - h["distance"], 3),  # convert distance → similarity
             }
             for h in hits
         ]
@@ -207,20 +207,20 @@ class RAGService:
             raise ValueError(f"Document {document_id} not found in cache.")
 
         sections = cached.get("sections", {})
-        text     = sections.get(section_name.lower(), "")
+        text = sections.get(section_name.lower(), "")
 
         if not text:
             return {
-                "section":     section_name,
-                "text":        "",
+                "section": section_name,
+                "text": "",
                 "explanation": f"The '{section_name}' section was not detected in this paper.",
             }
 
         explanation = llm.explain_section(section_name, text)
 
         return {
-            "section":     section_name,
-            "text":        text[:2000],   # raw excerpt (first 2k chars)
+            "section": section_name,
+            "text": text[:2000],   # raw excerpt (first 2k chars)
             "explanation": explanation,
         }
 

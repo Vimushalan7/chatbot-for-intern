@@ -10,9 +10,8 @@ Supports:
   • Section-specific summaries
 """
 
-import json
 import requests
-from typing import Generator, Optional
+from typing import Optional
 
 from app.core.config import settings
 from app.core.logger import logger
@@ -50,7 +49,7 @@ class OllamaLLM:
 
     def __init__(self):
         self.base_url = settings.OLLAMA_BASE_URL
-        self.model    = settings.OLLAMA_MODEL
+        self.model = settings.OLLAMA_MODEL
 
     def _is_available(self) -> bool:
         """Check if LLM is available (either local Ollama or cloud Groq)."""
@@ -106,14 +105,14 @@ class OllamaLLM:
 
         # Fallback to local Ollama
         payload = {
-            "model":  self.model,
+            "model": self.model,
             "prompt": prompt,
             "system": system,
             "stream": False,
             "options": {
                 "temperature": 0.0,    # 0.0 = highest truthfulness (deterministic selection)
-                "top_p":       0.9,
-                "num_ctx":     4096,   # context window
+                "top_p": 0.9,
+                "num_ctx": 4096,   # context window
             },
         }
 
@@ -154,7 +153,7 @@ class OllamaLLM:
         """
         # Build context block
         context = "\n\n---\n\n".join(
-            f"[Chunk {i+1}]\n{chunk}" for i, chunk in enumerate(context_chunks)
+            f"[Chunk {i + 1}]\n{chunk}" for i, chunk in enumerate(context_chunks)
         )
 
         # Build chat history string

@@ -7,7 +7,6 @@ All environment-driven settings live here; nothing is hardcoded elsewhere.
 
 from pydantic_settings import BaseSettings
 from pathlib import Path
-import os
 
 
 class Settings(BaseSettings):

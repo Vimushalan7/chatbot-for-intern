@@ -9,7 +9,6 @@ Responsibilities:
   • Add, query, and delete documents
 """
 
-import uuid
 from typing import Optional
 
 import chromadb
@@ -44,7 +43,7 @@ class VectorStore:
         Generate embeddings via Ollama REST API.
         Falls back to a lightweight sentence-transformers model if Ollama is unavailable.
         """
-        import requests, json
+        import requests
 
         try:
             embeddings = []
@@ -87,7 +86,7 @@ class VectorStore:
         logger.info(f"Embedding {len(chunks)} chunks for document {document_id} …")
         embeddings = self._embed(chunks)
 
-        ids       = [f"{document_id}_chunk_{i}" for i in range(len(chunks))]
+        ids = [f"{document_id}_chunk_{i}" for i in range(len(chunks))]
         meta_list = [
             {
                 "document_id": document_id,
@@ -160,8 +159,8 @@ class VectorStore:
     def list_documents(self) -> list[str]:
         """Return distinct document IDs currently stored."""
         results = self.collection.get(include=["metadatas"])
-        seen    = set()
-        ids     = []
+        seen = set()
+        ids = []
         for meta in results.get("metadatas", []):
             doc_id = meta.get("document_id")
             if doc_id and doc_id not in seen:

@@ -13,13 +13,10 @@ Endpoints:
   GET  /api/health          → System health check
 """
 
-import os
 import uuid
-import shutil
 from pathlib import Path
 
-from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, File, UploadFile, HTTPException
 
 from app.api.schemas import (
     AskRequest, AskResponse, SourceChunk,
@@ -65,7 +62,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     # Generate unique document ID and save file
     document_id = str(uuid.uuid4())
-    save_path   = Path(settings.UPLOAD_DIR) / f"{document_id}.pdf"
+    save_path = Path(settings.UPLOAD_DIR) / f"{document_id}.pdf"
 
     with open(save_path, "wb") as f:
         f.write(content)
@@ -197,9 +194,9 @@ async def health_check():
     - Ollama LLM server
     - ChromaDB vector store
     """
-    ollama_status   = llm.health_check()
-    stored_docs     = len(vector_store.list_documents())
-    overall_status  = "healthy" if ollama_status["status"] == "online" else "degraded"
+    ollama_status = llm.health_check()
+    stored_docs = len(vector_store.list_documents())
+    overall_status = "healthy" if ollama_status["status"] == "online" else "degraded"
 
     return HealthResponse(
         status=overall_status,
