@@ -72,6 +72,7 @@ class OllamaLLM:
         import os
         anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
         if anthropic_key:
+            anthropic_key = anthropic_key.strip()
             url = "https://api.anthropic.com/v1/messages"
             headers = {
                 "x-api-key": anthropic_key,
@@ -108,6 +109,7 @@ class OllamaLLM:
 
         groq_key = os.environ.get("GROQ_API_KEY")
         if groq_key:
+            groq_key = groq_key.strip()
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {groq_key}",
